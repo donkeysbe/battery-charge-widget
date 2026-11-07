@@ -1,0 +1,191 @@
+/* Top bar */
+.srw-panel-label {
+  padding-left: 3px;
+  font-feature-settings: "tnum";
+}
+.srw-panel-power {
+  padding-left: 6px;
+  font-size: 0.9em;
+  font-feature-settings: "tnum";
+}
+
+/* Popup */
+.srw-content {
+  padding: 6px 10px 2px;
+  spacing: 16px;
+}
+
+.srw-hero { spacing: 4px; }
+.srw-percent {
+  font-size: 30pt;
+  font-weight: 800;
+  font-feature-settings: "tnum";
+}
+.srw-pill {
+  spacing: 7px;
+  padding: 4px 11px;
+  border-radius: 99px;
+  background-color: rgba(127, 127, 127, 0.16);
+}
+.srw-pill-label { font-size: 9.5pt; font-weight: bold; }
+.srw-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 4px;
+  background-color: #8e8e93;
+}
+.srw-dot.charging, .srw-dot.full { background-color: #2ec27e; }
+.srw-dot.discharging { background-color: #f5a623; }
+.srw-dot.holding { background-color: -st-accent-color; }
+
+.srw-subtitle { font-size: 10pt; }
+
+.srw-bar-wrap { padding: 8px 0 2px; }
+.srw-track {
+  border-radius: 5px;
+  background-color: rgba(127, 127, 127, 0.22);
+}
+.srw-fill {
+  border-radius: 5px;
+  background-color: -st-accent-color;
+}
+.srw-fill.low { background-color: #e01b24; }
+.srw-marker {
+  border-radius: 2px;
+  background-color: rgba(127, 127, 127, 0.95);
+}
+
+.srw-block { spacing: 8px; }
+.srw-heading {
+  font-size: 8pt;
+  font-weight: bold;
+}
+.srw-heading-value {
+  font-size: 9pt;
+  font-weight: bold;
+  font-feature-settings: "tnum";
+}
+
+/* Stat tiles */
+.srw-stat {
+  padding: 8px 11px;
+  border-radius: 12px;
+  background-color: rgba(127, 127, 127, 0.10);
+  spacing: 1px;
+}
+.srw-stat-label { font-size: 8.5pt; }
+.srw-stat-value {
+  font-size: 12pt;
+  font-weight: bold;
+  font-feature-settings: "tnum";
+}
+.srw-stat-sub {
+  font-size: 8.5pt;
+  font-feature-settings: "tnum";
+}
+
+/* Power modes */
+.srw-modes { spacing: 6px; }
+.srw-mode {
+  padding: 10px 4px 8px;
+  border-radius: 12px;
+  background-color: rgba(127, 127, 127, 0.10);
+  transition-duration: 120ms;
+}
+.srw-mode:hover { background-color: rgba(127, 127, 127, 0.22); }
+.srw-mode:active { background-color: rgba(127, 127, 127, 0.30); }
+.srw-mode:focus { box-shadow: inset 0 0 0 2px -st-accent-color; }
+.srw-mode:checked {
+  background-color: -st-accent-color;
+  color: -st-accent-fg-color;
+}
+.srw-mode:checked:focus { box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.6); }
+.srw-mode-icon { icon-size: 20px; padding-bottom: 5px; }
+.srw-mode-label { font-size: 9.5pt; font-weight: bold; }
+
+.srw-mode-desc {
+  font-size: 9.5pt;
+  min-height: 34px;
+}
+
+.srw-message {
+  spacing: 8px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background-color: rgba(127, 127, 127, 0.10);
+}
+.srw-message.error { background-color: rgba(224, 27, 36, 0.18); }
+.srw-message-icon { icon-size: 16px; }
+.srw-message-label { font-size: 9pt; }
+
+.srw-footer { font-size: 8pt; padding-top: 2px; }
+
+/* ---- System Resources additions ---- */
+.srw-percent-unit {
+  font-size: 13pt;
+  font-weight: bold;
+  padding: 0 0 7px 6px;
+}
+.srw-dot.cool { background-color: #2ec27e; }
+.srw-dot.warm { background-color: #f5a623; }
+.srw-dot.hot { background-color: #e01b24; }
+
+/* Per-thread load bars */
+.srw-core-track {
+  border-radius: 3px;
+  background-color: rgba(127, 127, 127, 0.22);
+}
+.srw-core-fill {
+  border-radius: 3px;
+  background-color: -st-accent-color;
+}
+.srw-core-fill.busy { background-color: #f5a623; }
+
+/* Graph legend */
+.srw-legend { spacing: 12px; }
+.srw-key { spacing: 6px; }
+.srw-key-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 4px;
+}
+.srw-key-dot.cpu { background-color: #3584e4; }
+.srw-key-dot.mem { background-color: #33d17a; }
+
+/* Top processes */
+.srw-procs {
+  spacing: 2px;
+  padding: 6px 11px;
+  border-radius: 12px;
+  background-color: rgba(127, 127, 127, 0.10);
+}
+.srw-proc { spacing: 10px; padding: 2px 0; }
+.srw-proc-name { font-size: 10pt; font-weight: bold; }
+.srw-proc-count { font-size: 9pt; }
+.srw-proc-mem {
+  font-size: 9pt;
+  text-align: right;
+  min-width: 64px;
+  font-feature-settings: "tnum";
+}
+.srw-proc-cpu {
+  font-size: 10pt;
+  text-align: right;
+  font-weight: bold;
+  min-width: 44px;
+  font-feature-settings: "tnum";
+}
+.srw-link {
+  font-size: 8.5pt;
+  font-weight: bold;
+  padding: 1px 8px;
+  border-radius: 99px;
+  color: -st-accent-color;
+}
+.srw-link:hover { background-color: rgba(127, 127, 127, 0.18); }
+.srw-link:focus { box-shadow: inset 0 0 0 2px -st-accent-color; }
+
+/* Temperatures: one small column per sensor */
+.srw-cols { spacing: 6px; padding-top: 2px; }
+.srw-stat-value.warm { color: #f5a623; }
+.srw-stat-value.hot { color: #e01b24; }

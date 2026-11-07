@@ -6,13 +6,15 @@ Small GNOME Shell widgets for the top bar. Each one shows a live reading in the 
 |---|---|---|
 | [Battery Charge](docs/battery-charge.md) | Battery level and charge rate | Battery and charger readings, power graph, charge mode switch (Long Life, Standard, Fast) |
 | [Network Monitor](docs/network-monitor.md) | Download and upload speed | Connection status, signal, traffic graph, IP and router details, latency, internet speed test (M-Lab), quick actions |
+| [System Resources](docs/system-resources.md) | CPU load and temperature | Per-thread load, CPU and memory graph, memory, swap, storage, disk activity, temperatures, GPUs, top processes, power mode switch |
 
 <p>
   <img src="docs/battery-charge.png" alt="Battery Charge popup" width="340">
   <img src="docs/network-monitor.png" alt="Network Monitor popup" width="340">
+  <img src="docs/system-resources.png" alt="System Resources popup" width="340">
 </p>
 
-Each widget is its own GNOME extension, so you can install one or both.
+Each widget is its own GNOME extension, so you can install any of them.
 
 ## Requirements
 
@@ -36,7 +38,7 @@ That installs every widget. To install only some of them, name them:
 ```
 
 ```bash
-./install.sh battery network
+./install.sh battery system
 ```
 
 Then log out and back in: GNOME on Wayland only loads new extensions at login.
@@ -58,11 +60,11 @@ gnome-extensions disable network-monitor@donkeysbe
 ## Uninstall
 
 ```bash
-gnome-extensions disable battery-charge@donkeysbe network-monitor@donkeysbe
+gnome-extensions disable battery-charge@donkeysbe network-monitor@donkeysbe system-resources@donkeysbe
 ```
 
 ```bash
-rm -r ~/.local/share/gnome-shell/extensions/battery-charge@donkeysbe ~/.local/share/gnome-shell/extensions/network-monitor@donkeysbe
+rm -r ~/.local/share/gnome-shell/extensions/{battery-charge,network-monitor,system-resources}@donkeysbe
 ```
 
 ```bash
@@ -74,6 +76,7 @@ sudo rm /etc/udev/rules.d/90-battery-charge-mode.rules
 ```
 battery-charge@donkeysbe/    Battery Charge extension
 network-monitor@donkeysbe/   Network Monitor extension
+system-resources@donkeysbe/  System Resources extension
 udev/                        udev rule for Battery Charge
 docs/                        a page and a screenshot per widget
 install.sh                   installs all or some of the widgets

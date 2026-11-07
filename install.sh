@@ -4,6 +4,7 @@
 #   ./install.sh                 install every widget
 #   ./install.sh battery         only Battery Charge
 #   ./install.sh network         only Network Monitor
+#   ./install.sh system          only System Resources
 set -euo pipefail
 
 here="$(cd "$(dirname "$0")" && pwd)"
@@ -12,8 +13,9 @@ ext_dir="$HOME/.local/share/gnome-shell/extensions"
 declare -A UUIDS=(
   [battery]="battery-charge@donkeysbe"
   [network]="network-monitor@donkeysbe"
+  [system]="system-resources@donkeysbe"
 )
-ORDER=(battery network)
+ORDER=(battery network system)
 
 if [ $# -eq 0 ]; then
   selected=("${ORDER[@]}")

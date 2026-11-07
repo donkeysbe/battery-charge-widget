@@ -20,8 +20,13 @@ import {Sampler} from './sysinfo.js';
 Gio._promisify(Gio.DBusProxy, 'new_for_bus');
 Gio._promisify(Gio.DBusProxy.prototype, 'call');
 
-// What the top bar shows, in order: any of 'cpu', 'ram', 'temp'.
-const PANEL_SHOW = ['cpu', 'temp'];
+// What the top bar shows, in order: any of 'cpu', 'temp', 'ram', 'disk'.
+// 'temp' is the CPU temperature, shown dimmed after the CPU load.
+const PANEL_SHOW = ['cpu', 'temp', 'ram', 'disk'];
+// How the top bar shows the main drive: 'used' (% full) or 'free' (space left).
+const PANEL_DISK = 'used';
+// The drive changes slowly, so the top bar checks it every 30 s.
+const DISK_EVERY = 30;
 // CPU temperature (°C) where the status turns Warm and Hot. Laptop chips
 // often run at 85-95 °C under load; most are rated for about 100-105 °C.
 const WARM_AT = 75;
@@ -112,12 +117,26 @@ class SystemIndicator extends PanelMenu.Button {
         this._modeList = '';
 
         // Top bar
+        // Each reading gets its own icon, except the temperature, which
+        // follows the CPU load in a dimmer, smaller font.
         const box = new St.BoxLayout({style_class: 'panel-status-menu-box'});
-        box.add_child(new St.Icon({gicon: localIcon('srw-chip-symbolic'), style_class: 'system-status-icon'}));
+        const icons = {
+            cpu: localIcon('srw-chip-symbolic'),
+            ram: localIcon('srw-memory-symbolic'),
+            disk: Gio.ThemedIcon.new_from_names(['drive-harddisk-solidstate-symbolic', 'drive-harddisk-symbolic']),
+            temp: PANEL_SHOW.includes('cpu') ? null : localIcon('srw-chip-symbolic'),
+        };
         this._panel = {};
         PANEL_SHOW.forEach((key, i) => {
-            const l = label('…', i === 0 ? 'srw-panel-label' : 'srw-panel-power', {
-                y_align: Clutter.ActorAlign.CENTER, opacity: i === 0 ? 255 : 170,
+            if (icons[key]) {
+                box.add_child(new St.Icon({
+                    gicon: icons[key],
+                    style_class: i === 0 ? 'system-status-icon' : 'system-status-icon srw-panel-icon',
+                }));
+            }
+            const dim = key === 'temp' && !icons.temp;
+            const l = label('…', dim ? 'srw-panel-power' : 'srw-panel-label', {
+                y_align: Clutter.ActorAlign.CENTER, opacity: dim ? 170 : 255,
             });
             box.add_child(l);
             this._panel[key] = l;
@@ -266,6 +285,14 @@ class SystemIndicator extends PanelMenu.Button {
         this._busy = true;
         try {
             const s = await this._sampler.read(this.menu.isOpen);
+            const t = GLib.get_monotonic_time() / 1e6;
+            if (s.disks) {
+                this._rootDisk = s.disks.find(d => d.mount === '/') ?? s.disks[0] ?? null;
+                this._rootDiskAt = t;
+            } else if (PANEL_SHOW.includes('disk') && !(t - (this._rootDiskAt ?? -1e9) < DISK_EVERY)) {
+                this._rootDisk = await this._sampler.rootDisk();
+                this._rootDiskAt = t;
+            }
             if (this._destroyed)
                 return;
             this._render(s);
@@ -293,13 +320,15 @@ class SystemIndicator extends PanelMenu.Button {
         }
 
         // panel
+        const d = this._rootDisk;
         const panelText = {
             cpu: `${Math.round(s.cpu.usage)}%`,
             ram: `${Math.round(memPct)}%`,
             temp: cpuTemp !== null ? `${Math.round(cpuTemp)}°C` : '',
+            disk: !d ? '–' : PANEL_DISK === 'free'
+                ? fmtSize(d.free).replace(/\.\d /, ' ')
+                : `${Math.round((1 - d.free / d.size) * 100)}%`,
         };
-        if (PANEL_SHOW.includes('cpu') && PANEL_SHOW.includes('ram'))
-            panelText.ram = `RAM ${panelText.ram}`;
         for (const [key, l] of Object.entries(this._panel))
             l.text = panelText[key] ?? '';
 

@@ -1,12 +1,12 @@
 # System Resources
 
-A top-bar widget that shows how hard your computer is working: CPU load and temperature in the bar, and everything else (memory, storage, temperatures, graphics, the busiest programs and the power mode) one click away.
+A top-bar widget that shows how hard your computer is working: CPU load and temperature, memory use and how full your drive is in the bar, and everything else (memory, storage, temperatures, graphics, the busiest programs and the power mode) one click away.
 
 <img src="system-resources.png" alt="The System Resources popup: CPU at 2% and 50 °C, per-thread bars, a usage graph, stat tiles, top processes and power mode buttons" width="420">
 
 ## What it shows
 
-- **Top bar:** CPU load and CPU temperature. You can add memory use (see [Settings](#settings)).
+- **Top bar:** CPU load with the CPU temperature, memory in use, and how full the main drive is, each with its own icon. You can pick which ones show and in what order, and show free space instead of a percentage (see [Settings](#settings)).
 - **Status:** CPU load, a temperature pill (Cool, Warm or Hot), the processor model, thread count, average clock speed and, on AMD laptops, the processor's power draw.
 - **Per-thread bars:** one bar per CPU thread, so you can see whether one program is maxing out a single core or the whole chip is busy. Bars above 85% turn amber.
 - **Usage graph** for the last 10 minutes: CPU load in blue, memory use in green.
@@ -25,7 +25,8 @@ At the top of `system-resources@donkeysbe/extension.js`:
 
 | Setting | Default | What it does |
 |---|---|---|
-| `PANEL_SHOW` | `['cpu', 'temp']` | What the top bar shows, in order. Any of `'cpu'`, `'ram'` and `'temp'`. |
+| `PANEL_SHOW` | `['cpu', 'temp', 'ram', 'disk']` | What the top bar shows, in order. Any of `'cpu'`, `'temp'`, `'ram'` and `'disk'`. |
+| `PANEL_DISK` | `'used'` | How the top bar shows the main drive: `'used'` for how full it is (15%), `'free'` for the space left (425 GB). |
 | `WARM_AT` | `75` | CPU temperature (°C) where the status turns Warm. |
 | `HOT_AT` | `92` | CPU temperature (°C) where it turns Hot. Laptop chips often run at 85–95 °C under load and are usually rated for about 100–105 °C, so Hot is set high to avoid false alarms. |
 
@@ -44,7 +45,7 @@ Run `./install.sh system` again and log out and back in after changing them.
 - **Power draw** on AMD laptops is the package power the built-in Radeon graphics driver reports, which covers CPU and graphics together. Intel only exposes this to root, so it isn't shown there.
 - **Storage** lists the drives mounted at `/` and other real partitions (not `/boot`, snaps or USB images), up to two.
 - **Power mode** talks to power-profiles-daemon over D-Bus, like GNOME's quick settings.
-- The widget reads everything every 2 seconds while the popup is open. While it's closed, it only reads what the top bar and graph need, every 3 seconds. Processes, drives and GPUs are read only while the popup is open.
+- The widget reads everything every 2 seconds while the popup is open. While it's closed, it only reads what the top bar and graph need, every 3 seconds, and checks the drive every 30 seconds. Processes, drives and GPUs are read only while the popup is open.
 
 To print what the widget reads on your machine, run:
 

@@ -6,7 +6,7 @@ Small GNOME Shell widgets for the top bar. Each one shows a live reading in the 
 |---|---|---|
 | [Battery Charge](docs/battery-charge.md) | Battery level and charge rate | Battery and charger readings, power graph, charge mode switch (Long Life, Standard, Fast) |
 | [Network Monitor](docs/network-monitor.md) | Download and upload speed | Connection status, signal, traffic graph, IP and router details, latency, internet speed test (M-Lab), quick actions |
-| [System Resources](docs/system-resources.md) | CPU load and temperature | Per-thread load, CPU and memory graph, memory, swap, storage, disk activity, temperatures, GPUs, top processes, power mode switch |
+| [System Resources](docs/system-resources.md) | CPU load and temperature, memory and disk use | Per-thread load, CPU and memory graph, memory, swap, storage, disk activity, temperatures, GPUs, top processes, power mode switch |
 
 <p>
   <img src="docs/battery-charge.png" alt="Battery Charge popup" width="340">

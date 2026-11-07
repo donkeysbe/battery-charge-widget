@@ -308,6 +308,12 @@ export class Sampler {
         }))).filter(Boolean);
     }
 
+    // Just the drive mounted at / (for the top bar).
+    async rootDisk() {
+        const disks = await this._disks();
+        return disks.find(d => d.mount === '/') ?? disks[0] ?? null;
+    }
+
     // A sleeping NVIDIA GPU is reported as sleeping, never woken up:
     // nvidia-smi only runs while it's already awake.
     async _gpus() {

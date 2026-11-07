@@ -189,3 +189,6 @@
 .srw-cols { spacing: 6px; padding-top: 2px; }
 .srw-stat-value.warm { color: #f5a623; }
 .srw-stat-value.hot { color: #e01b24; }
+
+/* Top bar: space before each extra reading's icon */
+.srw-panel-icon { margin-left: 10px; }

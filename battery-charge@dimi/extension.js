@@ -233,7 +233,7 @@ function describe(bat, mode) {
     const target = longLife ? LONG_LIFE_LIMIT : 100;
     // Long Life doesn't drain a fuller battery down; it just stops charging.
     const held = bat.capacity > LONG_LIFE_LIMIT + 2
-        ? `Paused · Long Life doesn't charge above ${LONG_LIFE_LIMIT}%`
+        ? `Holding at ${Math.round(bat.capacity)}% · Long Life won't charge above ${LONG_LIFE_LIMIT}%`
         : `Held near ${LONG_LIFE_LIMIT}% to protect the battery`;
     switch (bat.status) {
     case 'Discharging':

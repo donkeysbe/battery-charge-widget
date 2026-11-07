@@ -1,7 +1,8 @@
 {
   "uuid": "system-resources@donkeysbe",
   "name": "System Resources",
-  "description": "CPU load and temperature in the top bar, with memory, storage, disk activity, temperatures, GPUs, top processes and a power mode switch.",
+  "description": "CPU load and temperature, memory and free disk space in the top bar, with storage, disk activity, temperatures, GPUs, top processes and a power mode switch.",
+  "url": "https://github.com/donkeysbe/gnome-top-bar-widgets",
   "shell-version": ["48", "49", "50"],
   "version": 1
 }

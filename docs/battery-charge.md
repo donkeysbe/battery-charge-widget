@@ -32,11 +32,11 @@ The 60% stop point is set by the firmware and can differ between models. To chan
 
 ## Switching modes without a password
 
-`./install.sh battery` installs a udev rule (`/etc/udev/rules.d/90-battery-charge-mode.rules`) that lets members of the `sudo` group change the charge mode without a password. This step asks for your password once.
+The .deb and `./install.sh battery` both install a udev rule that lets members of the `sudo` group change the charge mode without a password: the .deb in `/usr/lib/udev/rules.d/`, `install.sh` in `/etc/udev/rules.d/` (it asks for your password once).
 
-Without the rule, the widget asks for your password through polkit each time you switch modes. On distributions where the admin group is `wheel` instead of `sudo`, change the group name in `udev/90-battery-charge-mode.rules` and in `install.sh`.
+The zip doesn't include the rule. Without it, the widget asks for your password through polkit each time you switch modes. On distributions where the admin group is `wheel` instead of `sudo`, change the group name in `udev/90-battery-charge-mode.rules` and in `install.sh`.
 
-To remove the rule:
+Removing the .deb removes its rule. To remove the one `install.sh` added:
 
 ```bash
 sudo rm /etc/udev/rules.d/90-battery-charge-mode.rules

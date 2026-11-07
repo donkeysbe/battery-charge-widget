@@ -2,10 +2,7 @@
   "uuid": "network-monitor@donkeysbe",
   "name": "Network Monitor",
   "description": "Live download and upload speed in the top bar, with connection details, signal, latency, a traffic graph and an internet speed test.",
-  "shell-version": [
-    "48",
-    "49",
-    "50"
-  ],
+  "url": "https://github.com/donkeysbe/gnome-top-bar-widgets",
+  "shell-version": ["48", "49", "50"],
   "version": 2
 }

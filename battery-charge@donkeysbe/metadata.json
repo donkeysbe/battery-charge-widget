@@ -2,6 +2,7 @@
   "uuid": "battery-charge@donkeysbe",
   "name": "Battery Charge",
   "description": "Live battery and charger readings in the top bar, with a switch for the charge mode (Long Life, Standard, Fast).",
+  "url": "https://github.com/donkeysbe/gnome-top-bar-widgets",
   "shell-version": ["48", "49", "50"],
   "version": 1
 }

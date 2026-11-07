@@ -25,13 +25,48 @@ Developed and tested on Ubuntu 26.04 (GNOME 50, Wayland) with a Lenovo IdeaPad 5
 
 ## Install
 
+Download from the [latest release](https://github.com/donkeysbe/gnome-top-bar-widgets/releases/latest). Pick one way:
+
+### Ubuntu and Debian: the .deb (all widgets)
+
+Download `gnome-top-bar-widgets_<version>_all.deb` and open it to install it with App Center, or run:
+
+```bash
+sudo apt install ./gnome-top-bar-widgets_1.0.0_all.deb
+```
+
+This installs all three widgets for every user on the computer, plus the udev rule that lets Battery Charge switch charge modes without a password. Then:
+
+1. Log out and back in: GNOME on Wayland only loads new extensions at login.
+2. Turn on the widgets you want in the Extensions app.
+
+To uninstall:
+
+```bash
+sudo apt remove gnome-top-bar-widgets
+```
+
+### Any distribution: one zip per widget
+
+Download the `.shell-extension.zip` of each widget you want and run, for example:
+
+```bash
+gnome-extensions install network-monitor@donkeysbe.shell-extension.zip
+```
+
+Then log out and back in, and turn it on in the Extensions app. The zip installs for your user only. Battery Charge installed this way asks for your password each time you switch charge modes ([details](docs/battery-charge.md#switching-modes-without-a-password)).
+
+To uninstall, remove it in the Extensions app.
+
+### From source
+
 ```bash
 git clone https://github.com/donkeysbe/gnome-top-bar-widgets.git
 cd gnome-top-bar-widgets
 ./install.sh
 ```
 
-That installs every widget. To install only some of them, name them:
+That installs every widget for your user and turns them on. To install only some of them, name them:
 
 ```bash
 ./install.sh network
@@ -41,23 +76,9 @@ That installs every widget. To install only some of them, name them:
 ./install.sh battery system
 ```
 
-Then log out and back in: GNOME on Wayland only loads new extensions at login.
+Then log out and back in. Battery Charge also installs the udev rule; that step asks for your password.
 
-The installer copies each widget to `~/.local/share/gnome-shell/extensions/` and turns it on. Battery Charge also installs a udev rule so you can switch charge modes without a password; that step asks for your password ([details](docs/battery-charge.md#switching-modes-without-a-password)).
-
-## Updating
-
-Pull the latest version, run `./install.sh` again, then log out and back in.
-
-## Turning a widget off
-
-Use the Extensions app, or:
-
-```bash
-gnome-extensions disable network-monitor@donkeysbe
-```
-
-## Uninstall
+To update, pull the latest version, run `./install.sh` again, then log out and back in. To uninstall:
 
 ```bash
 gnome-extensions disable battery-charge@donkeysbe network-monitor@donkeysbe system-resources@donkeysbe
@@ -71,6 +92,24 @@ rm -r ~/.local/share/gnome-shell/extensions/{battery-charge,network-monitor,syst
 sudo rm /etc/udev/rules.d/90-battery-charge-mode.rules
 ```
 
+A copy installed from source or a zip (in your home folder) takes priority over the .deb's copy, so remove one before switching to the other.
+
+## Turning a widget off
+
+Use the Extensions app, or:
+
+```bash
+gnome-extensions disable network-monitor@donkeysbe
+```
+
+## Building the packages
+
+```bash
+./package.sh
+```
+
+This writes the .deb and the three zips to `dist/`. It needs only `dpkg-deb` and `zip`, and no root. The version comes from `VERSION`.
+
 ## Layout
 
 ```
@@ -79,7 +118,9 @@ network-monitor@donkeysbe/   Network Monitor extension
 system-resources@donkeysbe/  System Resources extension
 udev/                        udev rule for Battery Charge
 docs/                        a page and a screenshot per widget
-install.sh                   installs all or some of the widgets
+install.sh                   installs all or some of the widgets from source
+package.sh                   builds the .deb and the zips into dist/
+VERSION                      the release version
 ```
 
-To add a widget, give it its own `<name>@donkeysbe/` folder with a unique CSS class prefix (GNOME loads every extension's stylesheet globally), and add it to `UUIDS` and `ORDER` in `install.sh`.
+To add a widget, give it its own `<name>@donkeysbe/` folder with a unique CSS class prefix (GNOME loads every extension's stylesheet globally), and add it to `UUIDS` and `ORDER` in `install.sh` and to `uuids` in `package.sh`.

@@ -1,0 +1,120 @@
+/* Same look as Battery Charge (bcw-*), under its own prefix so the two
+   extensions never restyle each other. */
+
+/* Top bar */
+.nmw-panel-icon-vpn { padding-left: 2px; }
+.nmw-panel-speed {
+  padding-left: 6px;
+  font-size: 0.9em;
+  font-feature-settings: "tnum";
+  min-width: 68px;
+}
+
+/* Popup */
+.nmw-content {
+  padding: 6px 10px 2px;
+  spacing: 16px;
+}
+
+.nmw-hero { spacing: 4px; }
+.nmw-title {
+  font-size: 20pt;
+  font-weight: 800;
+  padding-right: 10px;
+}
+.nmw-pill {
+  spacing: 7px;
+  padding: 4px 11px;
+  border-radius: 99px;
+  background-color: rgba(127, 127, 127, 0.16);
+}
+.nmw-pill-label { font-size: 9.5pt; font-weight: bold; }
+.nmw-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 4px;
+  background-color: #8e8e93;
+}
+.nmw-dot.online { background-color: #2ec27e; }
+.nmw-dot.limited, .nmw-dot.connecting { background-color: #f5a623; }
+.nmw-dot.offline { background-color: #e01b24; }
+
+.nmw-subtitle { font-size: 10pt; }
+
+.nmw-bar-wrap { padding: 8px 0 2px; }
+.nmw-track {
+  border-radius: 5px;
+  background-color: rgba(127, 127, 127, 0.22);
+}
+.nmw-fill {
+  border-radius: 5px;
+  background-color: -st-accent-color;
+}
+.nmw-fill.weak { background-color: #f5a623; }
+
+.nmw-block { spacing: 8px; }
+.nmw-heading {
+  font-size: 8pt;
+  font-weight: bold;
+}
+.nmw-heading-value {
+  font-size: 8.5pt;
+  font-weight: bold;
+}
+
+/* Graph legend: same colours as the graph lines */
+.nmw-legend { spacing: 12px; }
+.nmw-key { spacing: 6px; }
+.nmw-key-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 4px;
+}
+.nmw-key-dot.down { background-color: #3584e4; }
+.nmw-key-dot.up { background-color: #c061cb; }
+
+/* Stat tiles */
+.nmw-stat {
+  padding: 8px 11px;
+  border-radius: 12px;
+  background-color: rgba(127, 127, 127, 0.10);
+  spacing: 1px;
+}
+.nmw-stat-label { font-size: 8.5pt; }
+.nmw-stat-value {
+  font-size: 12pt;
+  font-weight: bold;
+  font-feature-settings: "tnum";
+}
+.nmw-stat-value.big { font-size: 16pt; }
+.nmw-stat-sub {
+  font-size: 8.5pt;
+  font-feature-settings: "tnum";
+}
+
+/* Quick actions */
+.nmw-actions { spacing: 6px; }
+.nmw-action {
+  padding: 10px 4px 8px;
+  border-radius: 12px;
+  background-color: rgba(127, 127, 127, 0.10);
+  transition-duration: 120ms;
+}
+.nmw-action:hover { background-color: rgba(127, 127, 127, 0.22); }
+.nmw-action:active { background-color: rgba(127, 127, 127, 0.30); }
+.nmw-action:focus { box-shadow: inset 0 0 0 2px -st-accent-color; }
+.nmw-action:checked {
+  background-color: -st-accent-color;
+  color: -st-accent-fg-color;
+}
+.nmw-action:checked:focus { box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.6); }
+.nmw-action:insensitive { color: rgba(127, 127, 127, 0.8); }
+.nmw-action-icon { icon-size: 20px; padding-bottom: 5px; }
+.nmw-action-label { font-size: 9.5pt; font-weight: bold; }
+
+.nmw-action-desc {
+  font-size: 9.5pt;
+  min-height: 34px;
+}
+
+.nmw-footer { font-size: 8pt; padding-top: 2px; }

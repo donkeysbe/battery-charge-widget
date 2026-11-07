@@ -5,7 +5,7 @@ Small GNOME Shell widgets for the top bar. Each one shows a live reading in the 
 | Widget | In the top bar | In the popup |
 |---|---|---|
 | [Battery Charge](docs/battery-charge.md) | Battery level and charge rate | Battery and charger readings, power graph, charge mode switch (Long Life, Standard, Fast) |
-| [Network Monitor](docs/network-monitor.md) | Download and upload speed | Connection status, signal, traffic graph, IP and router details, latency, quick actions |
+| [Network Monitor](docs/network-monitor.md) | Download and upload speed | Connection status, signal, traffic graph, IP and router details, latency, internet speed test (M-Lab), quick actions |
 
 <p>
   <img src="docs/battery-charge.png" alt="Battery Charge popup" width="340">

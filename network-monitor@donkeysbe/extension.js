@@ -16,6 +16,8 @@ import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 import * as Util from 'resource:///org/gnome/shell/misc/util.js';
 
+import {runSpeedTest} from './speedtest.js';
+
 Gio._promisify(Gio.File.prototype, 'load_contents_async');
 Gio._promisify(Gio.Subprocess.prototype, 'communicate_utf8_async');
 Gio._promisify(NM.Client, 'new_async');
@@ -34,6 +36,37 @@ const CONTENT_WIDTH = 340;
 
 const DOWN_RGB = [0.21, 0.52, 0.89]; // #3584e4
 const UP_RGB = [0.75, 0.38, 0.80];   // #c061cb
+
+let iconDir = null; // set on enable: the extension's icons/ folder
+
+function localIcon(name) {
+    const file = iconDir?.get_child(`${name}.svg`);
+    if (file?.query_exists(null))
+        return Gio.FileIcon.new(file);
+    return Gio.ThemedIcon.new(name);
+}
+
+// The last speed test result, kept across logins.
+const SPEEDTEST_FILE = GLib.build_filenamev([GLib.get_user_cache_dir(), 'network-monitor', 'speedtest.json']);
+
+function loadSpeedTest() {
+    try {
+        const [, bytes] = GLib.file_get_contents(SPEEDTEST_FILE);
+        const r = JSON.parse(new TextDecoder().decode(bytes));
+        return typeof r.download === 'number' ? r : null;
+    } catch {
+        return null;
+    }
+}
+
+function saveSpeedTest(r) {
+    try {
+        GLib.mkdir_with_parents(GLib.path_get_dirname(SPEEDTEST_FILE), 0o755);
+        GLib.file_set_contents(SPEEDTEST_FILE, JSON.stringify(r));
+    } catch (e) {
+        logError(e, 'network-monitor');
+    }
+}
 
 const PHYSICAL_TYPES = new Set([
     NM.DeviceType.WIFI, NM.DeviceType.ETHERNET, NM.DeviceType.MODEM, NM.DeviceType.BT,
@@ -239,6 +272,24 @@ function fmtRate(bytesPerSec, compact = false) {
 
 function fmtMbps(v) {
     return v >= 1000 ? `${(v / 1000).toFixed(v % 1000 ? 1 : 0)} Gb/s` : `${Math.round(v)} Mb/s`;
+}
+
+// Speed test results are always in bits, like every speed test site.
+function fmtTest(mbit) {
+    if (mbit >= 1000)
+        return `${(mbit / 1000).toFixed(2)} Gb/s`;
+    return `${mbit < 10 ? mbit.toFixed(1) : Math.round(mbit)} Mb/s`;
+}
+
+function fmtMs(v) {
+    return `${v < 10 ? v.toFixed(1) : Math.round(v)} ms`;
+}
+
+function fmtWhen(unix) {
+    const t = GLib.DateTime.new_from_unix_local(unix);
+    const today = GLib.DateTime.new_now_local();
+    const sameDay = t.get_year() === today.get_year() && t.get_day_of_year() === today.get_day_of_year();
+    return t.format(sameDay ? 'today %H:%M' : '%-d %b %H:%M');
 }
 
 function band(freq) {
@@ -481,6 +532,40 @@ class NetworkIndicator extends PanelMenu.Button {
         tile('dns', 'DNS servers', 0, 4, 2);
         c.add_child(grid);
 
+        // Speed test results: shown once a test has run (or is running)
+        const stBlock = new St.BoxLayout({style_class: 'nmw-block', orientation: Clutter.Orientation.VERTICAL, visible: false});
+        const stHead = new St.BoxLayout({x_expand: true});
+        stHead.add_child(label('SPEED TEST', 'nmw-heading', {x_expand: true, opacity: 160}));
+        this._stInfo = label('', 'nmw-heading-value', {opacity: 200});
+        stHead.add_child(this._stInfo);
+        stBlock.add_child(stHead);
+        const stRow = new St.BoxLayout({style_class: 'nmw-st-row', x_expand: true});
+        stRow.layout_manager.homogeneous = true;
+        this._stTiles = {};
+        for (const [key, caption, dotClass] of [['download', 'Download', 'down'], ['upload', 'Upload', 'up'], ['ping', 'Ping', null]]) {
+            const t = new St.BoxLayout({style_class: 'nmw-stat', orientation: Clutter.Orientation.VERTICAL, x_expand: true});
+            const capRow = new St.BoxLayout({style_class: 'nmw-key'});
+            if (dotClass)
+                capRow.add_child(new St.Widget({style_class: `nmw-key-dot ${dotClass}`, y_align: Clutter.ActorAlign.CENTER}));
+            capRow.add_child(label(caption, 'nmw-stat-label', {opacity: 160, y_align: Clutter.ActorAlign.CENTER}));
+            t.add_child(capRow);
+            const v = label('–', 'nmw-stat-value');
+            v.clutter_text.ellipsize = Pango.EllipsizeMode.END;
+            t.add_child(v);
+            stRow.add_child(t);
+            this._stTiles[key] = v;
+        }
+        stBlock.add_child(stRow);
+        this._stTrack = new St.Widget({style_class: 'nmw-track', width: CONTENT_WIDTH, height: 4, visible: false});
+        this._stFill = new St.Widget({style_class: 'nmw-fill', width: 0, height: 4});
+        this._stTrack.add_child(this._stFill);
+        stBlock.add_child(this._stTrack);
+        this._stError = label('', 'nmw-stat-sub', {visible: false});
+        this._stError.clutter_text.line_wrap = true;
+        stBlock.add_child(this._stError);
+        this._stBlock = stBlock;
+        c.add_child(stBlock);
+
         // Quick actions
         const actBlock = new St.BoxLayout({style_class: 'nmw-block', orientation: Clutter.Orientation.VERTICAL});
         actBlock.add_child(label('QUICK ACTIONS', 'nmw-heading', {opacity: 160}));
@@ -488,9 +573,13 @@ class NetworkIndicator extends PanelMenu.Button {
         row.layout_manager.homogeneous = true;
         const action = (id, text, icon, onClick) => {
             const content = new St.BoxLayout({orientation: Clutter.Orientation.VERTICAL, x_align: Clutter.ActorAlign.CENTER});
-            const ic = new St.Icon({icon_name: icon, style_class: 'nmw-action-icon', x_align: Clutter.ActorAlign.CENTER});
+            const ic = new St.Icon({
+                ...(typeof icon === 'string' ? {icon_name: icon} : {gicon: icon}),
+                style_class: 'nmw-action-icon', x_align: Clutter.ActorAlign.CENTER,
+            });
             content.add_child(ic);
-            content.add_child(label(text, 'nmw-action-label', {x_align: Clutter.ActorAlign.CENTER}));
+            const lbl = label(text, 'nmw-action-label', {x_align: Clutter.ActorAlign.CENTER});
+            content.add_child(lbl);
             const btn = new St.Button({
                 style_class: 'nmw-action', child: content, can_focus: true, x_expand: true, accessible_name: text,
             });
@@ -499,10 +588,11 @@ class NetworkIndicator extends PanelMenu.Button {
             btn.connect('key-focus-in', () => this._setHover(id));
             btn.connect('key-focus-out', () => this._setHover(null));
             row.add_child(btn);
-            this._actions[id] = {btn, icon: ic};
+            this._actions[id] = {btn, icon: ic, label: lbl};
         };
         action('wifi', 'Wi-Fi', 'network-wireless-symbolic', () => this._toggleWifi());
         action('copy', 'Copy IP', 'edit-copy-symbolic', () => this._copyIp());
+        action('speedtest', 'Speed test', localIcon('nmw-speedtest-symbolic'), () => this._speedTest());
         action('settings', 'Settings', 'emblem-system-symbolic', () => this._openSettings());
         actBlock.add_child(row);
         this._actionDesc = label('', 'nmw-action-desc', {opacity: 200});
@@ -513,6 +603,9 @@ class NetworkIndicator extends PanelMenu.Button {
 
         this._footer = label('', 'nmw-footer', {opacity: 130});
         c.add_child(this._footer);
+
+        this._st = {running: false, result: loadSpeedTest(), error: null};
+        this._renderSpeedTest();
     }
 
     _schedule(seconds) {
@@ -704,6 +797,11 @@ class NetworkIndicator extends PanelMenu.Button {
         case 'copy':
             this._actionDesc.text = ip ? `Copies ${ip} to the clipboard.` : 'No IP address to copy yet.';
             break;
+        case 'speedtest':
+            this._actionDesc.text = this._st.running
+                ? 'Stops the speed test.'
+                : 'Tests your speed with M-Lab, the test Google uses. Takes 20 s; results are public, including your IP.';
+            break;
         case 'settings':
             this._actionDesc.text = `Opens the ${c.hasWifi ? 'Wi-Fi' : 'Network'} page in Settings.`;
             break;
@@ -744,6 +842,89 @@ class NetworkIndicator extends PanelMenu.Button {
     _openSettings() {
         this.menu.close();
         Util.spawn(['gnome-control-center', this._conn?.hasWifi ? 'wifi' : 'network']);
+    }
+
+    // Click once to start, again to stop. It keeps running if the popup
+    // closes; the result stays until the next test (also across logins).
+    async _speedTest() {
+        if (this._st.running) {
+            this._stCancel?.cancel();
+            return;
+        }
+        const previous = this._st.result;
+        this._stCancel = new Gio.Cancellable();
+        this._st = {running: true, phase: 'locating', live: 0, fraction: 0, server: null,
+            download: null, upload: null, ping: null, result: previous, error: null};
+        this._renderSpeedTest();
+        try {
+            const r = await runSpeedTest({
+                cancellable: this._stCancel,
+                onProgress: p => {
+                    if (this._destroyed || !this._st.running)
+                        return;
+                    const st = this._st;
+                    if (p.phase === 'upload' && st.phase === 'download')
+                        st.download = st.live; // download finished
+                    if (p.ping !== undefined && p.ping !== null)
+                        st.ping = p.ping;
+                    Object.assign(st, {phase: p.phase, live: p.mbps, fraction: p.fraction, server: p.server});
+                    this._renderSpeedTest();
+                },
+            });
+            if (this._destroyed)
+                return;
+            const result = {
+                download: r.download, upload: r.upload, ping: r.ping,
+                city: r.server.city, country: r.server.country, at: r.at.to_unix(),
+            };
+            saveSpeedTest(result);
+            this._st = {running: false, result, error: null};
+        } catch (e) {
+            if (this._destroyed)
+                return;
+            const cancelled = e.matches?.(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED);
+            this._st = {running: false, result: previous, error: cancelled ? null : e.message};
+            if (cancelled)
+                this._showFlash('Speed test stopped.');
+        } finally {
+            this._stCancel = null;
+        }
+        this._renderSpeedTest();
+    }
+
+    _renderSpeedTest() {
+        const st = this._st;
+        const btn = this._actions.speedtest;
+        btn.btn.checked = st.running;
+        btn.label.text = st.running ? 'Stop' : 'Speed test';
+        btn.icon.gicon = st.running ? Gio.ThemedIcon.new('media-playback-stop-symbolic') : localIcon('nmw-speedtest-symbolic');
+
+        this._stBlock.visible = st.running || !!st.result || !!st.error;
+        this._stError.visible = !!st.error;
+        this._stError.text = st.error ? `Couldn't run the test: ${st.error}` : '';
+        this._stTrack.visible = st.running;
+
+        const t = this._stTiles;
+        if (st.running) {
+            this._stInfo.text = st.phase === 'locating' ? 'Finding a server…'
+                : `Testing ${st.phase} · ${st.server?.city ?? 'M-Lab'}`;
+            t.download.text = st.phase === 'download' ? fmtTest(st.live) : st.download !== null ? fmtTest(st.download) : '…';
+            t.upload.text = st.phase === 'upload' ? fmtTest(st.live) : '…';
+            t.ping.text = st.ping !== null ? fmtMs(st.ping) : '…';
+            const overall = st.phase === 'locating' ? 0.02
+                : st.phase === 'download' ? st.fraction / 2 : 0.5 + st.fraction / 2;
+            this._stFill.width = Math.round(CONTENT_WIDTH * Math.min(1, overall));
+        } else if (st.result) {
+            const r = st.result;
+            this._stInfo.text = [r.city, fmtWhen(r.at)].filter(Boolean).join(' · ');
+            t.download.text = fmtTest(r.download);
+            t.upload.text = fmtTest(r.upload);
+            t.ping.text = r.ping !== null ? fmtMs(r.ping) : '–';
+        } else {
+            this._stInfo.text = '';
+            t.download.text = t.upload.text = t.ping.text = '–';
+        }
+        this._updateDesc();
     }
 
     // Seconds shown on the graph: grows from 1 minute up to HISTORY_SECONDS
@@ -831,6 +1012,7 @@ class NetworkIndicator extends PanelMenu.Button {
                 this[id] = 0;
             }
         }
+        this._stCancel?.cancel();
         this._client?.disconnectObject(this);
         this._client = null;
         super.destroy();
@@ -839,6 +1021,7 @@ class NetworkIndicator extends PanelMenu.Button {
 
 export default class NetworkMonitorExtension extends Extension {
     enable() {
+        iconDir = this.dir.get_child('icons');
         this._indicator = new NetworkIndicator();
         Main.panel.addToStatusArea(this.uuid, this._indicator, 0, 'right');
         this._hideSystemNetwork();

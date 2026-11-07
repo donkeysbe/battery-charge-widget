@@ -1,0 +1,4 @@
+# Let members of the "sudo" (admin) group change the battery charge mode
+# without a password, so the Battery Charge widget can switch it directly.
+ACTION=="add", SUBSYSTEM=="power_supply", ATTR{type}=="Battery", TEST=="charge_types", \
+  RUN+="/usr/bin/chgrp sudo /sys%p/charge_types", RUN+="/usr/bin/chmod g+w /sys%p/charge_types"

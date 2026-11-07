@@ -1,5 +1,5 @@
 {
-  "uuid": "battery-charge@dimi",
+  "uuid": "battery-charge@donkeysbe",
   "name": "Battery Charge",
   "description": "Live battery and charger readings in the top bar, with a switch for the charge mode (Long Life, Standard, Fast).",
   "shell-version": ["48", "49", "50"],

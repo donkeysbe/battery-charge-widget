@@ -45,7 +45,7 @@ Then log out and back in: GNOME on Wayland only loads new extensions at login.
 
 The installer:
 
-1. Copies the extension to `~/.local/share/gnome-shell/extensions/battery-charge@dimi`.
+1. Copies the extension to `~/.local/share/gnome-shell/extensions/battery-charge@donkeysbe`.
 2. Installs a udev rule (`/etc/udev/rules.d/90-battery-charge-mode.rules`) that lets members of the `sudo` group change the charge mode without a password. This step asks for your password.
 3. Turns the extension on.
 
@@ -58,8 +58,8 @@ Pull the latest version, run `./install.sh` again, then log out and back in.
 ## Uninstall
 
 ```bash
-gnome-extensions disable battery-charge@dimi
-rm -r ~/.local/share/gnome-shell/extensions/battery-charge@dimi
+gnome-extensions disable battery-charge@donkeysbe
+rm -r ~/.local/share/gnome-shell/extensions/battery-charge@donkeysbe
 sudo rm /etc/udev/rules.d/90-battery-charge-mode.rules
 ```
 

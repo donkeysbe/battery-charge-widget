@@ -4,7 +4,7 @@
 set -euo pipefail
 
 here="$(cd "$(dirname "$0")" && pwd)"
-uuid="battery-charge@dimi"
+uuid="battery-charge@donkeysbe"
 dest="$HOME/.local/share/gnome-shell/extensions/$uuid"
 
 echo "• Installing extension to $dest"

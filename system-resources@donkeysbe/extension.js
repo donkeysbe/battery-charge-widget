@@ -23,8 +23,11 @@ Gio._promisify(Gio.DBusProxy.prototype, 'call');
 // What the top bar shows, in order: any of 'cpu', 'temp', 'ram', 'disk'.
 // 'temp' is the CPU temperature, shown dimmed after the CPU load.
 const PANEL_SHOW = ['cpu', 'temp', 'ram', 'disk'];
-// How the top bar shows the main drive: 'used' (% full) or 'free' (space left).
-const PANEL_DISK = 'used';
+// How the top bar shows memory: 'used' (4.2 GB in use) or 'percent' (30%).
+const PANEL_RAM = 'used';
+// How the top bar shows the main drive: 'free' (426 GB left), 'used'
+// (76 GB taken) or 'percent' (15% full).
+const PANEL_DISK = 'free';
 // The drive changes slowly, so the top bar checks it every 30 s.
 const DISK_EVERY = 30;
 // CPU temperature (°C) where the status turns Warm and Hot. Laptop chips
@@ -74,6 +77,17 @@ function localIcon(name) {
 
 function fmtSize(bytes) {
     return GLib.format_size(Math.max(0, bytes));
+}
+
+// For the top bar: 4.2 GB, 14 GB, 426 GB (one decimal only below 10).
+function fmtShort(bytes) {
+    const units = ['B', 'kB', 'MB', 'GB', 'TB'];
+    let v = Math.max(0, bytes), i = 0;
+    while (v >= 999.5 && i < units.length - 1) {
+        v /= 1000;
+        i++;
+    }
+    return `${i > 0 && v < 9.95 ? v.toFixed(1) : Math.round(v)} ${units[i]}`;
 }
 
 function fmtRate(bytesPerSec) {
@@ -323,11 +337,12 @@ class SystemIndicator extends PanelMenu.Button {
         const d = this._rootDisk;
         const panelText = {
             cpu: `${Math.round(s.cpu.usage)}%`,
-            ram: `${Math.round(memPct)}%`,
+            ram: PANEL_RAM === 'percent' ? `${Math.round(memPct)}%` : fmtShort(s.mem.used),
             temp: cpuTemp !== null ? `${Math.round(cpuTemp)}°C` : '',
-            disk: !d ? '–' : PANEL_DISK === 'free'
-                ? fmtSize(d.free).replace(/\.\d /, ' ')
-                : `${Math.round((1 - d.free / d.size) * 100)}%`,
+            disk: !d ? '–'
+                : PANEL_DISK === 'percent' ? `${Math.round((1 - d.free / d.size) * 100)}%`
+                : PANEL_DISK === 'used' ? fmtShort(d.size - d.free)
+                : `${fmtShort(d.free)} free`,
         };
         for (const [key, l] of Object.entries(this._panel))
             l.text = panelText[key] ?? '';

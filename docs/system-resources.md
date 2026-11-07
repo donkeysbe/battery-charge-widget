@@ -1,12 +1,12 @@
 # System Resources
 
-A top-bar widget that shows how hard your computer is working: CPU load and temperature, memory use and how full your drive is in the bar, and everything else (memory, storage, temperatures, graphics, the busiest programs and the power mode) one click away.
+A top-bar widget that shows how hard your computer is working: CPU load and temperature, memory in use and free disk space in the bar, and everything else (memory, storage, temperatures, graphics, the busiest programs and the power mode) one click away.
 
 <img src="system-resources.png" alt="The System Resources popup: CPU at 2% and 50 °C, per-thread bars, a usage graph, stat tiles, top processes and power mode buttons" width="420">
 
 ## What it shows
 
-- **Top bar:** CPU load with the CPU temperature, memory in use, and how full the main drive is, each with its own icon. You can pick which ones show and in what order, and show free space instead of a percentage (see [Settings](#settings)).
+- **Top bar:** CPU load with the CPU temperature, memory in use (3.9 GB) and free space on the main drive (426 GB free), each with its own icon. You can pick which ones show and in what order, and show percentages instead (see [Settings](#settings)).
 - **Status:** CPU load, a temperature pill (Cool, Warm or Hot), the processor model, thread count, average clock speed and, on AMD laptops, the processor's power draw.
 - **Per-thread bars:** one bar per CPU thread, so you can see whether one program is maxing out a single core or the whole chip is busy. Bars above 85% turn amber.
 - **Usage graph** for the last 10 minutes: CPU load in blue, memory use in green.
@@ -26,7 +26,8 @@ At the top of `system-resources@donkeysbe/extension.js`:
 | Setting | Default | What it does |
 |---|---|---|
 | `PANEL_SHOW` | `['cpu', 'temp', 'ram', 'disk']` | What the top bar shows, in order. Any of `'cpu'`, `'temp'`, `'ram'` and `'disk'`. |
-| `PANEL_DISK` | `'used'` | How the top bar shows the main drive: `'used'` for how full it is (15%), `'free'` for the space left (425 GB). |
+| `PANEL_RAM` | `'used'` | How the top bar shows memory: `'used'` for the amount in use (3.9 GB), `'percent'` for the share in use (28%). |
+| `PANEL_DISK` | `'free'` | How the top bar shows the main drive: `'free'` for the space left (426 GB free), `'used'` for the space taken (76 GB), `'percent'` for how full it is (15%). |
 | `WARM_AT` | `75` | CPU temperature (°C) where the status turns Warm. |
 | `HOT_AT` | `92` | CPU temperature (°C) where it turns Hot. Laptop chips often run at 85–95 °C under load and are usually rated for about 100–105 °C, so Hot is set high to avoid false alarms. |
 
